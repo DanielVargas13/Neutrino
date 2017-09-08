@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/refresh.svg</file>
+        <file>icons/next3.svg</file>
+        <file>icons/next3hovered.svg</file>
+        <file>icons/previous3.svg</file>
+        <file>icons/previous3hovered.svg</file>
+        <file>icons/next2.svg</file>
+        <file>icons/next2hovered.svg</file>
+        <file>icons/previous2.svg</file>
+        <file>icons/previous2hovered.svg</file>
+        <file>icons/refresh2.svg</file>
+        <file>icons/refresh2hovered.svg</file>
+        <file>icons/menu.svg</file>
+        <file>icons/menuhovered.svg</file>
+        <file>icons/cancel.svg</file>
+        <file>styles/style.qss</file>
+    </qresource>
+</RCC>
