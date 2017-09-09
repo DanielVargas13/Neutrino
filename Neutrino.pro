@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         browserwindow.cpp \
-    history.cpp
+    history.cpp \
+    adressbar.cpp
 
 HEADERS += \
         browserwindow.h \
-    history.h
+    history.h \
+    adressbar.h
 
 FORMS += \
         browserwindow.ui

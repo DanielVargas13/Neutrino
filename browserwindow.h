@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QWebEngineView>
 #include <QtWidgets>
+#include "adressbar.h"
 #include "history.h"
 
 
@@ -31,6 +32,7 @@ private slots :
     void newTab();
     void closeTab();
     void showHistory();
+    void adressBarClicked();
 
 private :
     void createIcons();
@@ -41,7 +43,7 @@ private :
 
 
     QTabWidget *tabs;
-    QLineEdit *m_adressBar;
+    AdressBar *m_adressBar;
     QIcon previousIcon;
     QIcon nextIcon;
     QIcon refreshIcon;

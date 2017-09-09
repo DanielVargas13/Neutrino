@@ -78,7 +78,7 @@ void BrowserWindow::createActions() {
 
 void BrowserWindow::createToolBar()
 {
-    m_adressBar = new QLineEdit;
+    m_adressBar = new AdressBar;
     m_adressBar->setStyleSheet("QLineEdit {  border: 1px solid gray; border-radius: 5px;}");
     m_adressBar->setAttribute(Qt::WA_MacShowFocusRect,0);
 
@@ -87,6 +87,7 @@ void BrowserWindow::createToolBar()
     dropShadowEffect->setBlurRadius(15);
     m_adressBar->setGraphicsEffect(dropShadowEffect);
 
+    connect(m_adressBar, SIGNAL(clicked()), this, SLOT(adressBarClicked()));
     connect(m_adressBar, SIGNAL(returnPressed()), this, SLOT(loadUrl()));
     QToolBar *m_toolBar = addToolBar("ToolBar");
     m_toolBar->setMovable(false);
@@ -196,9 +197,14 @@ void BrowserWindow::closeTab(){
 
 
 void BrowserWindow::handleUrlChanged(QUrl url)
-{
-
-    m_adressBar->setText(url.toString());
+{   QString url2 = url.toString();
+    QString shortUrl = "";
+    if(url2.left(11) == "http://www.") shortUrl = url2.right(url2.length()-10);
+    if(url2.left(12) == "https://www.") shortUrl = url2.right(url2.length()-12);
+    if(url2.left(4) == "www.") shortUrl = url2.right(url2.length()-3);
+    if(shortUrl.indexOf("/") != -1)shortUrl = shortUrl.left(shortUrl.indexOf("/"));
+    m_adressBar->setText(shortUrl);
+    m_adressBar->setAlignment(Qt::AlignCenter);
 
 }
 
@@ -220,5 +226,8 @@ void BrowserWindow::showHistory(){
 
 void BrowserWindow::handleLoadFinished(){
     m_history->saveToHistory(currentTab()->url(),currentTab()->title());
+}
+void BrowserWindow::adressBarClicked(){
+    m_adressBar->setAlignment(Qt::AlignLeft);
 }
 
