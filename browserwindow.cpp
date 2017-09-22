@@ -14,6 +14,10 @@ BrowserWindow::BrowserWindow()
     createActions();
     createToolBar();
 
+    lastSite=QUrl("about.blank");
+    predictedPage = new QWebEngineView();
+    predictedPage->load(QUrl("blank.org"));
+    m_predictor = new Predictor();
     m_history = new History();
     tabs = new QTabWidget;
     tabs->setMovable(true);
@@ -23,19 +27,20 @@ BrowserWindow::BrowserWindow()
     newTabButton->setText("+");
     tabs->setCornerWidget(newTabButton,Qt::TopRightCorner);
     connect(newTabButton, SIGNAL(clicked(bool)),this, SLOT(newTab()));
-    tabs->addTab(tabCreate(tr("http://www.unsplash.com")),tr("New tab"));
+    tabs->addTab(createTab(tr("http://www.unsplash.com")),tr("First tab"));
     std::cout << "creating BrowserWindow"<< '\n';
     //connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
     setCentralWidget(tabs);
 
     setMinimumSize(750,500);
-    setWindowTitle("Eclair project");
+    setWindowTitle("Neutrino");
 
 
 }
 
 BrowserWindow::~BrowserWindow()
 {
+
 }
 void BrowserWindow::createIcons() {
     QPixmap previousPm("icons/previous2.svg");
@@ -107,12 +112,11 @@ void BrowserWindow::createToolBar()
 
 
 QWebEngineView *BrowserWindow::currentTab()
-{   QWebEngineView *currenttab = tabs->currentWidget()->findChild<QWebEngineView *>();
-    std::cout << "current tab : "<< currenttab <<'\n';
+{
     return tabs->currentWidget()->findChild<QWebEngineView *>();
 }
 
-QWidget *BrowserWindow::tabCreate(QString url)
+QWidget *BrowserWindow::createTab(QString url)
 {
     std::cout << "Creating tab with url : " << url.toStdString() << '\n';
     QWidget *m_tab = new QWidget;
@@ -130,6 +134,10 @@ QWidget *BrowserWindow::tabCreate(QString url)
     else {
         m_webView->load(QUrl(url));
     }
+    if(lastSite.toString().toStdString() != "about.blank") m_predictor->addSite(lastSite.toString().toStdString(),m_webView->url().toString().toStdString());
+    lastSite = m_webView->url();
+    std::cout <<"predicted site"<<m_predictor->predictNextSite(m_webView->url().toString().toStdString()) << std::endl;
+    //predictedPage->load(QUrl(QString::fromStdString(m_predictor->predictNextSite(m_webView->url().toString().toStdString()))));
     connect(m_webView, SIGNAL(titleChanged(QString)),this,SLOT(handleTitleChanged(QString)));
     connect(m_webView, SIGNAL(urlChanged(QUrl)),this, SLOT(handleUrlChanged(QUrl)));
     connect(m_webView, SIGNAL(loadFinished(bool)), this, SLOT(handleLoadFinished()));
@@ -156,21 +164,36 @@ void BrowserWindow::previousPage()
 }
 
 void BrowserWindow::loadUrl()
-{   std::cout << "return pressed; loading url \n";
-    QWidget *currentWidget = tabs->currentWidget();
-    std::cout << "current widget : "<< currentWidget <<'\n';
+{   std::cout << "return pressed; loading url :" << m_adressBar->text().toStdString() << std::endl;
+    //QWidget *currentWidget = tabs->currentWidget();
+    //std::cout << "current widget : "<< currentWidget <<'\n';
     QString url = m_adressBar->text();
     if (url.left(7) != "http://" && url.left(8) != "https://") {
         url = "http://" + url;
     }
-    currentTab()->load(QUrl(url));
+    loadPage(url);
     m_adressBar->setText(currentTab()->url().toString());
     std::cout << "url loaded \n";
 }
 
 void BrowserWindow::loadPage(const QString url)
-{
+{   if(predictedPage->url() == url){
+        delete tabs->currentWidget()->layout();
+        QWebEngineView *newPage = new QWebEngineView();
+        std::swap(predictedPage,newPage);
+        QVBoxLayout *layout = new QVBoxLayout;
+        layout->setContentsMargins(0,0,0,0);
+        layout->addWidget(newPage);
+        tabs->currentWidget()->setLayout(layout);
+
+        std::cout << "Predicted page loaded from LoadPage !" << std::endl;
+        std::cout << "Current tab : "<< currentTab() << std::endl;
+        std::cout << "newPage :" << newPage << std::endl;
+    }
     currentTab()->load(QUrl(url));
+    //lastSite = QUrl(url);
+    std::string predictedSite = m_predictor->predictNextSite(currentTab()->url().toString().toStdString());
+    if (predictedSite != "about.blank") predictedPage->load(QUrl(QString::fromStdString(predictedSite)));
     m_adressBar->setText(currentTab()->url().toString());
 }
 
@@ -185,7 +208,7 @@ void BrowserWindow::stopLoad()
 }
 
 void BrowserWindow::newTab()
-{   QWidget *m_newTab = tabCreate("http://www.google.com");
+{   QWidget *m_newTab = createTab("http://www.google.com");
     tabs->addTab(m_newTab,"New Tab");
     tabs->setCurrentWidget(m_newTab);
 }
@@ -197,7 +220,26 @@ void BrowserWindow::closeTab(){
 
 
 void BrowserWindow::handleUrlChanged(QUrl url)
-{   QString url2 = url.toString();
+{   if(predictedPage->url() == url){
+        delete tabs->currentWidget()->layout();
+        QWebEngineView *newPage = new QWebEngineView();
+        std::swap(predictedPage,newPage);
+        QVBoxLayout *layout = new QVBoxLayout;
+        layout->setContentsMargins(0,0,0,0);
+        layout->addWidget(newPage);
+        tabs->currentWidget()->setLayout(layout);
+        std::cout << "Predicted page loaded from handleUrlChanged !" << std::endl;
+        std::cout << "Current tab : "<< currentTab() << std::endl;
+        std::cout << "newPage :" << newPage << std::endl;
+    }
+    else{
+        m_predictor->addSite(lastSite.toString().toStdString(),url.toString().toStdString());
+        lastSite = url;
+        std::string predictedSite = m_predictor->predictNextSite(currentTab()->url().toString().toStdString());
+        std::cout <<predictedSite << std::endl;
+        if (predictedSite != "about.blank") predictedPage->load(QUrl(QString::fromStdString(predictedSite)));
+    }
+    QString url2 = url.toString();
     QString shortUrl = "";
     if(url2.left(11) == "http://www.") shortUrl = url2.right(url2.length()-10);
     if(url2.left(12) == "https://www.") shortUrl = url2.right(url2.length()-12);
@@ -206,8 +248,9 @@ void BrowserWindow::handleUrlChanged(QUrl url)
     m_adressBar->setText(shortUrl);
     m_adressBar->setAlignment(Qt::AlignCenter);
 
-}
 
+
+}
 void BrowserWindow::handleTitleChanged(QString title)
 {
     tabs->setTabText(tabs->currentIndex(),title);
@@ -226,6 +269,7 @@ void BrowserWindow::showHistory(){
 
 void BrowserWindow::handleLoadFinished(){
     m_history->saveToHistory(currentTab()->url(),currentTab()->title());
+    m_predictor->saveToFile();
 }
 void BrowserWindow::adressBarClicked(){
     m_adressBar->setAlignment(Qt::AlignLeft);

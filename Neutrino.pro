@@ -5,7 +5,8 @@
 #-------------------------------------------------
 
 QT       += core gui
-
+QMAKE_MAC_SDK = macosx10.13
+QMAKE_MAC_SDK_PATH = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk"
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QT += webenginewidgets
 TARGET = Neutrino
@@ -27,12 +28,14 @@ SOURCES += \
         main.cpp \
         browserwindow.cpp \
     history.cpp \
-    adressbar.cpp
+    adressbar.cpp \
+    predictor.cpp
 
 HEADERS += \
         browserwindow.h \
     history.h \
-    adressbar.h
+    adressbar.h \
+    predictor.h
 
 FORMS += \
         browserwindow.ui

@@ -11,12 +11,11 @@ History::History()
 
 
 void History::saveToHistory(QUrl url, QString title){
-   bool header = QFile::exists("history.html");
+   bool fileExists = QFile::exists("history.html");
    QFile historyFile("history.html");
-   std::cout << "Permissions ? " << historyFile.permissions()<<'\n';
    historyFile.open(QIODevice::WriteOnly | QIODevice::Text |QIODevice::Append);
    QTextStream stream(&historyFile);
-   if(!header){
+   if(!fileExists){
        std::cout << "history.html doesn't exist, creating file" << std::endl;
        stream << "<!DOCTYPE html> \
                     <html> \

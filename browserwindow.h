@@ -6,6 +6,7 @@
 #include <QtWidgets>
 #include "adressbar.h"
 #include "history.h"
+#include "predictor.h"
 
 
 class BrowserWindow : public QMainWindow
@@ -17,7 +18,7 @@ public:
     ~BrowserWindow();
     void loadPage(const QString url);
     QWebEngineView *currentTab();
-    QWidget *tabCreate(const QString url);
+    QWidget *createTab(const QString url);
 
 private slots :
     //void handleWebviewLoadProgress(int);
@@ -59,7 +60,10 @@ private :
     QAction *loadAction;
     QAction *refreshAction;
 
+    QWebEngineView *predictedPage;
+    QUrl lastSite;
     History *m_history;
+    Predictor *m_predictor;
 
     //QProgressBar *m_loadProgress;
 

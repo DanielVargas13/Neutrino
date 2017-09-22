@@ -12,8 +12,6 @@ public:
     History();
     void saveToHistory(QUrl,QString);
 
-//private:
-    //QFile historyFile;
 
 };
 
