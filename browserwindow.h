@@ -31,7 +31,7 @@ private slots :
     void refresh();
     void stopLoad();
     void newTab();
-    void closeTab();
+    void closeTab(int);
     void showHistory();
     void adressBarClicked();
 

@@ -22,7 +22,7 @@ BrowserWindow::BrowserWindow()
     tabs = new QTabWidget;
     tabs->setMovable(true);
     tabs->setTabsClosable(true);
-    connect(tabs, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab()));
+    connect(tabs, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     QToolButton *newTabButton = new QToolButton();
     newTabButton->setText("+");
     tabs->setCornerWidget(newTabButton,Qt::TopRightCorner);
@@ -191,10 +191,10 @@ void BrowserWindow::loadPage(const QString url)
         std::cout << "newPage :" << newPage << std::endl;
     }
     currentTab()->load(QUrl(url));
-    //lastSite = QUrl(url);
+    std::cout << "Loaded : "<< url.toStdString()<< std::endl;
     std::string predictedSite = m_predictor->predictNextSite(currentTab()->url().toString().toStdString());
     if (predictedSite != "about.blank") predictedPage->load(QUrl(QString::fromStdString(predictedSite)));
-    m_adressBar->setText(currentTab()->url().toString());
+    m_adressBar->setText(url);
 }
 
 void BrowserWindow::refresh()
@@ -213,8 +213,8 @@ void BrowserWindow::newTab()
     tabs->setCurrentWidget(m_newTab);
 }
 
-void BrowserWindow::closeTab(){
-    tabs->removeTab(tabs->currentIndex());
+void BrowserWindow::closeTab(int index){
+    tabs->removeTab(index);
 
 }
 
