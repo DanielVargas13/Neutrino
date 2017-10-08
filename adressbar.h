@@ -10,6 +10,7 @@ class AdressBar : public QLineEdit
 public:
     AdressBar(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
     ~AdressBar();
+    void setUrl(QUrl);
 signals:
     void clicked();
 

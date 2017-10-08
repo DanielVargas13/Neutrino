@@ -25,6 +25,7 @@ private slots :
     void handleTitleChanged(QString);
     void handleUrlChanged(QUrl);
     void handleLoadFinished();
+    void handleTabChanged();
     void nextPage();
     void previousPage();
     void loadUrl();

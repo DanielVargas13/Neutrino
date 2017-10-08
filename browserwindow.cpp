@@ -29,7 +29,7 @@ BrowserWindow::BrowserWindow()
     connect(newTabButton, SIGNAL(clicked(bool)),this, SLOT(newTab()));
     tabs->addTab(createTab(tr("http://www.unsplash.com")),tr("First tab"));
     std::cout << "creating BrowserWindow"<< '\n';
-    //connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
+    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged()));
     setCentralWidget(tabs);
 
     setMinimumSize(750,500);
@@ -152,14 +152,14 @@ QWidget *BrowserWindow::createTab(QString url)
 void BrowserWindow::nextPage()
 {
     currentTab()->forward();
-    m_adressBar->setText(currentTab()->url().toString());
+    m_adressBar->setUrl(currentTab()->url());
 
 }
 
 void BrowserWindow::previousPage()
 {
     currentTab()->back();
-    m_adressBar->setText(currentTab()->url().toString());
+    m_adressBar->setUrl(currentTab()->url());
 
 }
 
@@ -172,7 +172,7 @@ void BrowserWindow::loadUrl()
         url = "http://" + url;
     }
     loadPage(url);
-    m_adressBar->setText(currentTab()->url().toString());
+    m_adressBar->setUrl(currentTab()->url());
     std::cout << "url loaded \n";
 }
 
@@ -239,14 +239,7 @@ void BrowserWindow::handleUrlChanged(QUrl url)
         std::cout <<predictedSite << std::endl;
         if (predictedSite != "about.blank") predictedPage->load(QUrl(QString::fromStdString(predictedSite)));
     }
-    QString url2 = url.toString();
-    QString shortUrl = "";
-    if(url2.left(11) == "http://www.") shortUrl = url2.right(url2.length()-10);
-    if(url2.left(12) == "https://www.") shortUrl = url2.right(url2.length()-12);
-    if(url2.left(4) == "www.") shortUrl = url2.right(url2.length()-3);
-    if(shortUrl.indexOf("/") != -1)shortUrl = shortUrl.left(shortUrl.indexOf("/"));
-    m_adressBar->setText(shortUrl);
-    m_adressBar->setAlignment(Qt::AlignCenter);
+    m_adressBar->setUrl(url);
 
 
 
@@ -275,3 +268,6 @@ void BrowserWindow::adressBarClicked(){
     m_adressBar->setAlignment(Qt::AlignLeft);
 }
 
+void BrowserWindow::handleTabChanged(){
+    m_adressBar->setUrl(currentTab()->url());
+}
