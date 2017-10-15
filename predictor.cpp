@@ -16,6 +16,7 @@ Predictor::Predictor()
     QTextStream stream(&matrixFile);
     if(!fileExists){
         std::cout << "Matrix file doesn't exist, creating file" << std::endl;
+        siteMatrix.resize(1, std::vector<int>(1,0));
         siteMatrix[0][0] = 0;
         index = 0;
         siteMap["https://unsplash.com/"] = 0;
@@ -26,17 +27,27 @@ Predictor::Predictor()
         int i = 0;
         while(!matrixFile.atEnd()){
             QString line = matrixFile.readLine();
-            std::cout <<"Reading from matrixFile : "<<line.toStdString() << std::endl;
-            if(line == "[Matrix]") readingMatrix = true;
-            if(!readingMatrix){
-                int n = line.indexOf(":");
-                if(line.split(":").length() > 0){
-                    std::string url = line.mid(n).toStdString();
-                    siteMap[url] = line.left(n).toInt();
-                    numberMap[n] = url;
+            //std::cout <<"Reading from matrixFile : "<<line.toStdString() << std::endl;
+            if(line.left(7) == "[Matrix") {
+                readingMatrix = true;
+                std::cout << "Reading the matrix "<< std::endl;
+                index = line.mid(15,line.indexOf(']')-15).toInt();
+                std::cout <<"Index read :"<<index <<std::endl;
+                siteMatrix.resize(index+1);
+                for(int i = 0; i < siteMatrix.size();i++){
+                    siteMatrix[i].resize(index+1);
                 }
             }
-            else if(line != "[Matrix]" && readingMatrix){
+            else if(line.length() > 1 && line.indexOf(":") != -1){
+                int n = line.indexOf(":");
+                if(line.split(":").length() > 1){
+                    std::string url = line.right(line.length()-n-1).toStdString();
+                    siteMap[url] = line.left(n).toInt();
+                    numberMap[line.left(n).toInt()] = url;
+                    std::cout << "Maps entry :" << siteMap[url] <<" : "<< numberMap[line.left(n).toInt()]<< std::endl;
+                }
+            }
+            else if(line.length() > 0 && line.left(7) != "[Matrix"){
                 std::cout << "Matrix read from file : \n";
                 for(int j = 0; j<line.split(" ").length(); j++){
                     siteMatrix[i][j] = line.split(" ")[j].toInt();
@@ -47,13 +58,14 @@ Predictor::Predictor()
             }
         }
     index = i;
+    std::cout << "Maps content : "<<std::endl;
+    for(int k = 0; k < index; k++) std::cout << k<<":"<<numberMap[k]<<std::endl;
 
     }
 }
 
 void Predictor::addSite(std::string previousSite, std::string site){
-    std::map<std::string, int>::iterator it = siteMap.find(site);
-    if(it == siteMap.end()){
+    if((siteMap.find(site) == siteMap.end() || siteMap.empty()) && siteMap.find(previousSite) != siteMap.end()){
         index++;
         siteMap[site] = index;
         std::cout << "adding site "<<site<<" with index "<<index <<" and previous site : "<<previousSite<<std::endl;
@@ -65,7 +77,10 @@ void Predictor::addSite(std::string previousSite, std::string site){
         siteMatrix[siteMap[previousSite]][siteMap[site]] = 1;
         std::cout << "adding site in the matrix at "<<siteMap[previousSite]<<" "<<siteMap[site] <<std::endl;
     }
-    else siteMatrix[siteMap[previousSite]][siteMap[site]]++;
+    else {
+        std::cout<<"Trying to increment at position "<<siteMap[previousSite]<<","<<siteMap[site]<<std::endl;
+        siteMatrix[siteMap[previousSite]][siteMap[site]]++;
+    }
     std::cout << "Matrix size : "<<siteMatrix.size()<<" "<<siteMatrix[0].size()<< std::endl;
     for(int j = 0; j <siteMatrix.size();j++){
         for(int k = 0; k < siteMatrix[0].size();k++){
@@ -104,9 +119,9 @@ void Predictor::saveToFile(){
     std::cout << "File open when saving : "<<fileOpen<<std::endl;
     QTextStream stream(&matrixFile);
     for(int i = 0; i <= index; i++){
-        stream <<i<<":"<<QString::fromStdString(numberMap[i])<< "\n";
+        stream <<i<<":"<<QString::fromStdString(numberMap[i]);
     }
-    stream << "[Matrix] \n";
+    stream<<endl << "[Matrix size = "<<index+1 <<"]"<<endl;
     for(int i = 0; i <= index; i++){
         for(int j = 0; j <= index; j++){
             stream << siteMatrix[i][j]<<" ";

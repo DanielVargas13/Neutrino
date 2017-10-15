@@ -134,9 +134,9 @@ QWidget *BrowserWindow::createTab(QString url)
     else {
         m_webView->load(QUrl(url));
     }
-    if(lastSite.toString().toStdString() != "about.blank") m_predictor->addSite(lastSite.toString().toStdString(),m_webView->url().toString().toStdString());
+    if(lastSite.toString().toStdString() != "about.blank" && lastSite.toString().length() > 0) m_predictor->addSite(lastSite.toString().toStdString(),m_webView->url().toString().toStdString());
     lastSite = m_webView->url();
-    std::cout <<"predicted site"<<m_predictor->predictNextSite(m_webView->url().toString().toStdString()) << std::endl;
+    std::cout << m_predictor->predictNextSite(m_webView->url().toString().toStdString()) << std::endl;
     //predictedPage->load(QUrl(QString::fromStdString(m_predictor->predictNextSite(m_webView->url().toString().toStdString()))));
     connect(m_webView, SIGNAL(titleChanged(QString)),this,SLOT(handleTitleChanged(QString)));
     connect(m_webView, SIGNAL(urlChanged(QUrl)),this, SLOT(handleUrlChanged(QUrl)));
@@ -233,7 +233,7 @@ void BrowserWindow::handleUrlChanged(QUrl url)
         std::cout << "newPage :" << newPage << std::endl;
     }
     else{
-        m_predictor->addSite(lastSite.toString().toStdString(),url.toString().toStdString());
+        if(lastSite.toString().length() > 0 && url.toString().length()> 0) m_predictor->addSite(lastSite.toString().toStdString(),url.toString().toStdString());
         lastSite = url;
         std::string predictedSite = m_predictor->predictNextSite(currentTab()->url().toString().toStdString());
         std::cout <<predictedSite << std::endl;
