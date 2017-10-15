@@ -42,6 +42,7 @@ Predictor::Predictor()
                 int n = line.indexOf(":");
                 if(line.split(":").length() > 1){
                     std::string url = line.right(line.length()-n-1).toStdString();
+                    url.erase(std::remove(url.begin(), url.end(), '\n'), url.end());
                     siteMap[url] = line.left(n).toInt();
                     numberMap[line.left(n).toInt()] = url;
                     std::cout << "Maps entry :" << siteMap[url] <<" : "<< numberMap[line.left(n).toInt()]<< std::endl;
@@ -66,6 +67,8 @@ Predictor::Predictor()
 
 void Predictor::addSite(std::string previousSite, std::string site){
     if((siteMap.find(site) == siteMap.end() || siteMap.empty()) && siteMap.find(previousSite) != siteMap.end()){
+        site.erase(std::remove(site.begin(), site.end(), '\n'), site.end());
+        previousSite.erase(std::remove(previousSite.begin(), previousSite.end(), '\n'), previousSite.end());
         index++;
         siteMap[site] = index;
         std::cout << "adding site "<<site<<" with index "<<index <<" and previous site : "<<previousSite<<std::endl;
@@ -77,10 +80,8 @@ void Predictor::addSite(std::string previousSite, std::string site){
         siteMatrix[siteMap[previousSite]][siteMap[site]] = 1;
         std::cout << "adding site in the matrix at "<<siteMap[previousSite]<<" "<<siteMap[site] <<std::endl;
     }
-    else {
-        std::cout<<"Trying to increment at position "<<siteMap[previousSite]<<","<<siteMap[site]<<std::endl;
-        siteMatrix[siteMap[previousSite]][siteMap[site]]++;
-    }
+    else siteMatrix[siteMap[previousSite]][siteMap[site]]++;
+
     std::cout << "Matrix size : "<<siteMatrix.size()<<" "<<siteMatrix[0].size()<< std::endl;
     for(int j = 0; j <siteMatrix.size();j++){
         for(int k = 0; k < siteMatrix[0].size();k++){
@@ -119,14 +120,14 @@ void Predictor::saveToFile(){
     std::cout << "File open when saving : "<<fileOpen<<std::endl;
     QTextStream stream(&matrixFile);
     for(int i = 0; i <= index; i++){
-        stream <<i<<":"<<QString::fromStdString(numberMap[i]);
+        stream <<i<<":"<<QString::fromStdString(numberMap[i])<<endl;
     }
-    stream<<endl << "[Matrix size = "<<index+1 <<"]"<<endl;
+    stream<< "[Matrix size = "<<index+1 <<"]"<<endl;
     for(int i = 0; i <= index; i++){
         for(int j = 0; j <= index; j++){
             stream << siteMatrix[i][j]<<" ";
         }
-        stream <<"\n";
+        stream<<endl;
     }
     matrixFile.close();
 }
