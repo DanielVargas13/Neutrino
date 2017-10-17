@@ -41,6 +41,7 @@ private :
     void createActions();
     void createToolBar();
     void createFavHistoryMenu();
+    void loadPredictedPage(int);
     //void createStatusBar;
 
 
