@@ -45,11 +45,9 @@ Predictor::Predictor()
                     url.erase(std::remove(url.begin(), url.end(), '\n'), url.end());
                     siteMap[url] = line.left(n).toInt();
                     numberMap[line.left(n).toInt()] = url;
-                    std::cout << "Maps entry :" << siteMap[url] <<" : "<< numberMap[line.left(n).toInt()]<< std::endl;
                 }
             }
             else if(line.length() > 0 && line.left(7) != "[Matrix"){
-                std::cout << "Matrix read from file : \n";
                 for(int j = 0; j<line.split(" ").length(); j++){
                     siteMatrix[i][j] = line.split(" ")[j].toInt();
                     std::cout << siteMatrix[i][j];

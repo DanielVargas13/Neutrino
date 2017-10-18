@@ -29,7 +29,7 @@ BrowserWindow::BrowserWindow()
     connect(newTabButton, SIGNAL(clicked(bool)),this, SLOT(newTab()));
     tabs->addTab(createTab(tr("http://www.unsplash.com")),tr("First tab"));
     std::cout << "creating BrowserWindow"<< '\n';
-    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged()));
+    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
     setCentralWidget(tabs);
 
     setMinimumSize(750,500);
@@ -136,8 +136,6 @@ QWidget *BrowserWindow::createTab(QString url)
     }
     if(lastSite.toString().toStdString() != "about.blank" && lastSite.toString().length() > 0 && lastSite.toString() != m_webView->url().toString()) m_predictor->addSite(lastSite.toString().toStdString(),m_webView->url().toString().toStdString());
     lastSite = m_webView->url();
-    std::cout << m_predictor->predictNextSite(m_webView->url().toString().toStdString()) << std::endl;
-    //predictedPage->load(QUrl(QString::fromStdString(m_predictor->predictNextSite(m_webView->url().toString().toStdString()))));
     connect(m_webView, SIGNAL(titleChanged(QString)),this,SLOT(handleTitleChanged(QString)));
     connect(m_webView, SIGNAL(urlChanged(QUrl)),this, SLOT(handleUrlChanged(QUrl)));
     connect(m_webView, SIGNAL(loadFinished(bool)), this, SLOT(handleLoadFinished()));
@@ -178,19 +176,6 @@ void BrowserWindow::loadUrl()
 
 void BrowserWindow::loadPage(const QString url)
 {   if(predictedPage->url() == url && predictedPage->url().toString() != lastSite.toString())loadPredictedPage(tabs->currentIndex());
-        /*
-        delete tabs->currentWidget()->layout();
-        QWebEngineView *newPage = new QWebEngineView();
-        std::swap(predictedPage,newPage);
-        QVBoxLayout *layout = new QVBoxLayout;
-        layout->setContentsMargins(0,0,0,0);
-        layout->addWidget(newPage);
-        tabs->currentWidget()->setLayout(layout);
-
-        std::cout << "Predicted page loaded from LoadPage !" << std::endl;
-        std::cout << "Current tab : "<< currentTab() << std::endl;
-        std::cout << "newPage :" << newPage << std::endl;
-    }*/
     currentTab()->load(QUrl(url));
     std::cout << "Loaded : "<< url.toStdString()<< std::endl;
     std::string predictedSite = m_predictor->predictNextSite(currentTab()->url().toString().toStdString());
@@ -222,18 +207,7 @@ void BrowserWindow::closeTab(int index){
 
 void BrowserWindow::handleUrlChanged(QUrl url)
 {   if(predictedPage->url() == url && predictedPage->url() != lastSite) loadPredictedPage(tabs->currentIndex());
-        /*
-        delete tabs->currentWidget()->layout();
-        QWebEngineView *newPage = new QWebEngineView();
-        std::swap(predictedPage,newPage);
-        QVBoxLayout *layout = new QVBoxLayout;
-        layout->setContentsMargins(0,0,0,0);
-        layout->addWidget(newPage);
-        tabs->currentWidget()->setLayout(layout);
-        std::cout << "Predicted page loaded from handleUrlChanged !" << std::endl;
-        std::cout << "Current tab : "<< currentTab() << std::endl;
-        std::cout << "newPage :" << newPage << std::endl;
-    }*/
+
     else{
         if(lastSite.toString().length() > 0 && url.toString().length()> 0 && lastSite.toString() != url.toString()) m_predictor->addSite(lastSite.toString().toStdString(),url.toString().toStdString());
         lastSite = url;
@@ -270,8 +244,9 @@ void BrowserWindow::adressBarClicked(){
     m_adressBar->setAlignment(Qt::AlignLeft);
 }
 
-void BrowserWindow::handleTabChanged(){
-    m_adressBar->setUrl(currentTab()->url());
+void BrowserWindow::handleTabChanged(int index){
+
+    if(index >= 0) m_adressBar->setUrl(tabs->widget(index)->findChild<QWebEngineView *>()->url());
 }
 
 void BrowserWindow::loadPredictedPage(int index){
@@ -286,11 +261,11 @@ void BrowserWindow::loadPredictedPage(int index){
     m_tab->addAction(closeTabAction);
     if(lastSite.toString().toStdString() != "about.blank" && lastSite.toString().length() > 0 && lastSite.toString() != m_webView->url().toString()) m_predictor->addSite(lastSite.toString().toStdString(),m_webView->url().toString().toStdString());
     lastSite = m_webView->url();
-    std::cout << m_predictor->predictNextSite(m_webView->url().toString().toStdString()) << std::endl;
     connect(m_webView, SIGNAL(titleChanged(QString)),this,SLOT(handleTitleChanged(QString)));
     connect(m_webView, SIGNAL(urlChanged(QUrl)),this, SLOT(handleUrlChanged(QUrl)));
     connect(m_webView, SIGNAL(loadFinished(bool)), this, SLOT(handleLoadFinished()));
     tabs->removeTab(index);
     int insertedIndex = tabs->insertTab(index,m_tab,m_webView->title());
+    tabs->setCurrentIndex(index);
     std::cout << "Tab inserted at index "<<insertedIndex<<std::endl;
 }
