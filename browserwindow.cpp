@@ -234,10 +234,11 @@ void BrowserWindow::showHistory(){
     historyHtml += "</body></HTML>";
     currentTab()->setHtml(historyHtml,QUrl());
     tabs->setTabText(tabs->currentIndex(),"History");
+    historyFile.close();
 }
 
 void BrowserWindow::handleLoadFinished(){
-    m_history->saveToHistory(currentTab()->url(),currentTab()->title());
+    if (currentTab()->url().toString() != "about:blank")  m_history->saveToHistory(currentTab()->url(),currentTab()->title());
     m_predictor->saveToFile();
 }
 void BrowserWindow::adressBarClicked(){

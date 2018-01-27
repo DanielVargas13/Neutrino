@@ -25,8 +25,9 @@ Predictor::Predictor()
     else{
         bool readingMatrix = false;
         int i = 0;
+        QString line;
         while(!matrixFile.atEnd()){
-            QString line = matrixFile.readLine();
+            line = matrixFile.readLine();
             //std::cout <<"Reading from matrixFile : "<<line.toStdString() << std::endl;
             if(line.left(7) == "[Matrix") {
                 readingMatrix = true;
@@ -81,12 +82,12 @@ void Predictor::addSite(std::string previousSite, std::string site){
     else siteMatrix[siteMap[previousSite]][siteMap[site]]++;
 
     std::cout << "Matrix size : "<<siteMatrix.size()<<" "<<siteMatrix[0].size()<< std::endl;
-    for(int j = 0; j <siteMatrix.size();j++){
+    /*for(int j = 0; j <siteMatrix.size();j++){
         for(int k = 0; k < siteMatrix[0].size();k++){
             std::cout<<siteMatrix[j][k]<<" ";
         }
         std::cout<<std::endl;
-    }
+    }*/
 
 }
 
